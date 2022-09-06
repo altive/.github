@@ -1,6 +1,7 @@
 {
     "name": "Flutter app code check Workflow",
     "description": "Workflow to check the quality of Flutter app code.",
+    "iconName": "altive-icon",
     "categories": [
         "Dart"
     ],
