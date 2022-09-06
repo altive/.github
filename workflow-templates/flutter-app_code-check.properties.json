@@ -1,0 +1,11 @@
+{
+    "name": "Flutter app code check Workflow",
+    "description": "Workflow to check the quality of Flutter app code.",
+    "categories": [
+        "Dart"
+    ],
+    "filePatterns": [
+        "melos.yaml",
+        ".fvm"
+    ]
+}
