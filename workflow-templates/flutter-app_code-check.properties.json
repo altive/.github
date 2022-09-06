@@ -5,8 +5,5 @@
     "categories": [
         "Dart"
     ],
-    "filePatterns": [
-        "melos.yaml",
-        ".fvm"
-    ]
+    "filePatterns": []
 }
