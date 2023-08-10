@@ -1,0 +1,12 @@
+{
+    "name": "Create release pull request for Flutter app",
+    "description": "Flutterアプリのリリース用ブランチとプルリクエストを作成します。",
+    "iconName": "altive-icon",
+    "categories": [
+        "Automation",
+        "Dart"
+    ],
+    "filePatterns": [
+        "pubspec.yaml"
+    ]
+}
