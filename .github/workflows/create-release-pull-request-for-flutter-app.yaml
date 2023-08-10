@@ -1,4 +1,4 @@
-name: Create release pull request
+name: Create release pull request for Flutter app
 
 on:
   workflow_call:
@@ -58,7 +58,7 @@ jobs:
           echo "branch_name=${{ env.BRANCH_NAME }} " >> "$GITHUB_OUTPUT"
 
   # リリースブランチを作成する。
-  create-release-branch:
+  create-branch:
     name: Create release branch
     runs-on: ubuntu-latest
     needs: [set-version-and-branch-name]
@@ -91,7 +91,7 @@ jobs:
   bump-version:
     name: Bump version and build number
     runs-on: ubuntu-latest
-    needs: [set-version-and-branch-name, create-release-branch]
+    needs: [set-version-and-branch-name, create-branch]
     steps:
       - uses: actions/checkout@v3
 
