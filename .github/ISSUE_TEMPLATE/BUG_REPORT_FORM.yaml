@@ -1,0 +1,48 @@
+name: 不具合の報告 (Bug Report for Japanese)
+description: 不具合を報告します。
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees:
+  - riscait
+body:
+  - type: markdown
+    attributes:
+      value: |
+        不具合報告にご協力いただきありがとうございます！
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 発生した不具合
+      description: 何が起こったか教えてください。また、どのような結果を期待していたかも教えてください。
+      placeholder: 見たことを教えてください！
+      value: "### 発生した不具合\n\n### 本来期待する動作\n"
+    validations:
+      required: true
+  - type: dropdown
+    id: version
+    attributes:
+      label: バージョン
+      description: どのバージョンのソフトウェアを使用していますか？
+      options:
+        - 本番製品
+        - ベータ版
+    validations:
+      required: true
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: どのプラットフォームで問題が発生していますか？
+      multiple: true
+      options:
+        - Android
+        - iOS
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 行動規範
+      description: この問題を提出することで、当プロジェクトの[行動規範](https://example.com)に従うことに同意するものとします。
+      options:
+        - label: 当プロジェクトの行動規範に従うことに同意します。
+          required: true
