@@ -2,5 +2,8 @@
     "cSpell.words": [
         "dgst",
         "noreply"
-    ]
+    ],
+    "yaml.schemas": {
+        "https://json.schemastore.org/yamllint.json": ".github/ISSUE_TEMPLATE/config.yml"
+    }
 }
