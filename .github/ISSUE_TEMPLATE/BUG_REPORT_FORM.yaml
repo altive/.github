@@ -42,7 +42,7 @@ body:
     id: terms
     attributes:
       label: 行動規範
-      description: この問題を提出することで、当プロジェクトの[行動規範](/CODE_OF_CONDUCT.md)に従うことに同意するものとします。
+      description: この問題を提出することで、当プロジェクトの[行動規範](../blob/main/CODE_OF_CONDUCT.md)に従うことに同意するものとします。
       options:
         - label: 当プロジェクトの行動規範に従うことに同意します。
           required: true
