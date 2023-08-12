@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: I have a problem and I need help
-    url: ./discussions
+    url: https://github.com/altive/.github/discussions
     about: Please ask and answer questions here.
+  - name: Organization's web site
+    url: https://altive.dev
+    about: Web-site of Altive Inc.
