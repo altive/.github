@@ -161,10 +161,10 @@ jobs:
           private_key: ${{ secrets.private-key }}
 
       # mainブランチ向けにPull-Requestを作成する。
-      - name: Create release PR to main
+      - name: Create release PR
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: gh pr create -B "main" -t ${{ env.BRANCH_NAME }} -b "" -a $GITHUB_ACTOR -H ${{ env.BRANCH_NAME }}
+        run: gh pr create -B $GITHUB_REF -t ${{ env.BRANCH_NAME }} -b "" -a $GITHUB_ACTOR -H ${{ env.BRANCH_NAME }}
 
       # GitHub Appのトークンを失効させる。
       - name: Revoke GitHub Apps token
