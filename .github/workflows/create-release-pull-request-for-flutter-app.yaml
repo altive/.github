@@ -18,6 +18,9 @@ on:
       private-key:
         description: "GitHub App private key"
         required: true
+      app-token:
+        description: "GitHub App token"
+        required: false
 
 jobs:
   # リリースバージョンとブランチ名を設定する。
@@ -152,24 +155,37 @@ jobs:
         run: |
           echo "BRANCH_NAME=${{ needs.set-version-and-branch-name.outputs.branch_name }}" >> $GITHUB_ENV
 
-      # GitHub Appのトークンを生成する。
+      # secrets: app-tokenの存在確認
+      - name: Check for Secret availability
+        id: secret-check
+        # perform secret check & put boolean result as an output
+        shell: bash
+        run: |
+          if [ "${{ secrets.app-token }}" == "" ]; then
+            echo "has-token=false" >> $GITHUB_OUTPUT;
+          else
+            echo "has-token=true" >> $GITHUB_OUTPUT;
+          fi
+
+      # app-tokenの提供がなければ、GitHub Appのトークンを生成する。
       - name: Generate GiHub App token
+        if: ${{ !steps.secret-check.outputs.has-token }}
         id: generate_token
         uses: tibdex/github-app-token@v1
         with:
           app_id: ${{ secrets.app-id }}
           private_key: ${{ secrets.private-key }}
-          permissions: >-
-            {"contents": "write", "pull_requests": "write", "metadata": "read"}
 
       # mainブランチ向けにPull-Requestを作成する。
       - name: Create release PR
         env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          GITHUB_TOKEN: |-
+            ${{ steps.secret-check.outputs.has-token && secrets.app-token || steps.generate_token.outputs.token }}
         run: gh pr create -B $GITHUB_REF -t ${{ env.BRANCH_NAME }} -b "" -a $GITHUB_ACTOR -H ${{ env.BRANCH_NAME }}
 
       # GitHub Appのトークンを失効させる。
       - name: Revoke GitHub Apps token
+        if: ${{ !steps.secret-check.outputs.has-token }}
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
