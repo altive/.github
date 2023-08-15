@@ -159,6 +159,8 @@ jobs:
         with:
           app_id: ${{ secrets.app-id }}
           private_key: ${{ secrets.private-key }}
+          permissions: >-
+            {"contents": "write", "pull_requests": "write", "metadata": "read"}
 
       # mainブランチ向けにPull-Requestを作成する。
       - name: Create release PR
