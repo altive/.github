@@ -29,9 +29,17 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set-output.outputs.version }}
+      build-number: ${{ steps.set-output.outputs.build-number }}
       branch_name: ${{ steps.set-output.outputs.branch_name }}
     steps:
       - uses: actions/checkout@v3
+
+      # 現在のバージョンとビルド番号を取得する。
+      - name: Retrieve pubspec metadata
+        id: pubspec
+        uses: altive/pubspec-metadata@v1
+        with:
+          pubspec-file: "${{ inputs.working-directory }}/pubspec.yaml"
 
       # リリースバージョンが入力されている場合は入力されたバージョンを環境変数に設定する。
       - name: Set input version to GITHUB_ENV
@@ -43,9 +51,7 @@ jobs:
       - name: Set current version to GITHUB_ENV
         if: ${{ !inputs.version }}
         run: |
-          version=$(perl -ne 'print $1 if /^version:\s+(\d+\.\d+\.\d+)/' pubspec.yaml)
-          echo "VERSION=${version}" >> $GITHUB_ENV
-        working-directory: ${{ inputs.working-directory }}
+          echo "VERSION=${{ steps.pubspec.outputs.version-number }}" >> $GITHUB_ENV
 
       # リリースブランチ名を環境変数に設定する。
       - name: Set branch name to GITHUB_OUTPUT
@@ -53,12 +59,13 @@ jobs:
           branch_name="release/${{ env.VERSION }}"
           echo "BRANCH_NAME=${branch_name}" >> $GITHUB_ENV
 
-      # リリースバージョンとリリースブランチ名を出力変数に設定する。
+      # リリースバージョン・インクリメントしたビルド番号・リリースブランチ名を出力変数に設定する。
       - name: Set version and branch name to GITHUB_OUTPUT
         id: set-output
         run: |
-          echo "version=${{ env.VERSION }} " >> "$GITHUB_OUTPUT"
-          echo "branch_name=${{ env.BRANCH_NAME }} " >> "$GITHUB_OUTPUT"
+          echo "version=${{ env.VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "build-number=$((${{ steps.pubspec.outputs.build-number }} + 1))" >> "$GITHUB_OUTPUT"
+          echo "branch_name=${{ env.BRANCH_NAME }}" >> "$GITHUB_OUTPUT"
 
   # リリースブランチを作成する。
   create-branch:
@@ -102,6 +109,7 @@ jobs:
       - name: Set version and branch name to GITHUB_ENV
         run: |
           echo "VERSION=${{ needs.set-version-and-branch-name.outputs.version }}" >> $GITHUB_ENV
+          echo "BUILD=${{ needs.set-version-and-branch-name.outputs.build-number }}" >> $GITHUB_ENV
           echo "BRANCH_NAME=${{ needs.set-version-and-branch-name.outputs.branch_name }}" >> $GITHUB_ENV
 
       # 作成したリリースブランチに切り替える。
@@ -114,7 +122,8 @@ jobs:
       - name: Bump version and build number
         run: |
           VERSION=${{ env.VERSION }}
-          perl -i -pse 's/^(version:\s)+\d+\.\d+\.\d+\+(\d+)$/$1.$version.($2+1)/e' -- -version=${VERSION}+ pubspec.yaml
+          BUILD=${{ env.BUILD }}
+          sed -i "s/^version:.*$/version:\ $VERSION\+$BUILD/" ./pubspec.yaml
         working-directory: ${{ inputs.working-directory }}
 
       # 変更差分があるかどうかを判定し、結果を環境変数に設定する。
@@ -136,7 +145,7 @@ jobs:
         if: env.DIFF_COUNT != '0'
         run: |
           git add .
-          git commit -m "Bump version and build number"
+          git commit -m "build: bump app to ${{ env.VERSION }}+${{ env.BUILD }}"
           git push origin ${{ env.BRANCH_NAME }}
 
   # Pull-Requestを作成する。
