@@ -4,7 +4,9 @@ on:
   workflow_call:
     inputs:
       version:
-        description: "リリースバージョン（例: 1.0.0）\n未指定の場合はビルド番号のみインクリメント。"
+        description: |
+          Release version (e.g., 1.0.0)
+          If not specified, only the build number is incremented.
         required: false
         type: string
       working-directory:
@@ -169,16 +171,18 @@ jobs:
         id: secret-check
         # perform secret check & put boolean result as an output
         shell: bash
+        env: 
+          APP_TOKEN: ${{ secrets.app-token }}
         run: |
-          if [ "${{ secrets.app-token }}" == "" ]; then
-            echo "has-token=false" >> $GITHUB_OUTPUT;
+          if [ -n "$APP_TOKEN" ]; then
+            echo "HAS_TOKEN=true" >> $GITHUB_ENV;
           else
-            echo "has-token=true" >> $GITHUB_OUTPUT;
+            echo "HAS_TOKEN=false" >> $GITHUB_ENV;
           fi
 
       # app-tokenの提供がなければ、GitHub Appのトークンを生成する。
       - name: Generate GiHub App token
-        if: ${{ !steps.secret-check.outputs.has-token }}
+        if: ${{ env.HAS_TOKEN }} == 'false'
         id: generate_token
         uses: tibdex/github-app-token@v1
         with:
