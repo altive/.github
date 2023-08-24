@@ -135,7 +135,7 @@ jobs:
       - name: Git config
         if: env.DIFF_COUNT != '0'
         run: |
-          git remote set-url origin https://github-actions:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git remote set-url origin "https://github-actions:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}"
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
@@ -188,7 +188,7 @@ jobs:
         env:
           GITHUB_TOKEN: |-
             ${{ env.HAS_TOKEN && secrets.app-token || steps.generate_token.outputs.token }}
-        run: gh pr create -B $GITHUB_REF -t ${{ env.BRANCH_NAME }} -b "" -a $GITHUB_ACTOR -H ${{ env.BRANCH_NAME }}
+        run: gh pr create -B "$GITHUB_REF" -t ${{ env.BRANCH_NAME }} -b "" -a "$GITHUB_ACTOR" -H ${{ env.BRANCH_NAME }}
 
       # GitHub Appのトークンを失効させる。
       - name: Revoke GitHub Apps token
