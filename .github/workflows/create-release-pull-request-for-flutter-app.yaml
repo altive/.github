@@ -104,15 +104,12 @@ jobs:
     name: Bump version and build number
     runs-on: ubuntu-latest
     needs: [set-version-and-branch-name, create-branch]
+    env:
+      VERSION: ${{ needs.set-version-and-branch-name.outputs.version }}
+      BUILD: ${{ needs.set-version-and-branch-name.outputs.build-number }}
+      BRANCH_NAME: ${{ needs.set-version-and-branch-name.outputs.branch_name }}
     steps:
       - uses: actions/checkout@v3
-
-      # バージョンとブランチ名を環境変数に設定する。
-      - name: Set version and branch name to GITHUB_ENV
-        run: |
-          echo "VERSION=${{ needs.set-version-and-branch-name.outputs.version }}" >> $GITHUB_ENV
-          echo "BUILD=${{ needs.set-version-and-branch-name.outputs.build-number }}" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${{ needs.set-version-and-branch-name.outputs.branch_name }}" >> $GITHUB_ENV
 
       # 作成したリリースブランチに切り替える。
       - name: Switch branch
@@ -123,9 +120,7 @@ jobs:
       # バージョン番号とビルド番号を上げる。
       - name: Bump version and build number
         run: |
-          VERSION=${{ env.VERSION }}
-          BUILD=${{ env.BUILD }}
-          sed -i "s/^version:.*$/version:\ $VERSION\+$BUILD/" ./pubspec.yaml
+          sed -i "s/^version:.*$/version:\ ${{ env.VERSION }}\+${{ env.BUILD }}/" ./pubspec.yaml
         working-directory: ${{ inputs.working-directory }}
 
       # 変更差分があるかどうかを判定し、結果を環境変数に設定する。
@@ -158,13 +153,10 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    env: 
+      BRANCH_NAME: ${{ needs.set-version-and-branch-name.outputs.branch_name }}
     steps:
       - uses: actions/checkout@v3
-
-      # ブランチ名を環境変数に設定する。
-      - name: Set branch name to GITHUB_ENV
-        run: |
-          echo "BRANCH_NAME=${{ needs.set-version-and-branch-name.outputs.branch_name }}" >> $GITHUB_ENV
 
       # secrets: app-tokenの存在確認
       - name: Check for Secret availability
@@ -193,12 +185,12 @@ jobs:
       - name: Create release PR
         env:
           GITHUB_TOKEN: |-
-            ${{ steps.secret-check.outputs.has-token && secrets.app-token || steps.generate_token.outputs.token }}
+            ${{ env.HAS_TOKEN && secrets.app-token || steps.generate_token.outputs.token }}
         run: gh pr create -B $GITHUB_REF -t ${{ env.BRANCH_NAME }} -b "" -a $GITHUB_ACTOR -H ${{ env.BRANCH_NAME }}
 
       # GitHub Appのトークンを失効させる。
       - name: Revoke GitHub Apps token
-        if: ${{ !steps.secret-check.outputs.has-token }}
+        if: ${{ env.HAS_TOKEN }} == 'false'
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
