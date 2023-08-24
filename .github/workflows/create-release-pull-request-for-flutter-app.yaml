@@ -47,27 +47,29 @@ jobs:
       - name: Set input version to GITHUB_ENV
         if: ${{ inputs.version }}
         run: |
-          echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          echo "VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
 
       # リリースバージョンが入力されていない場合は現在のバージョンを環境変数に設定する。
       - name: Set current version to GITHUB_ENV
         if: ${{ !inputs.version }}
         run: |
-          echo "VERSION=${{ steps.pubspec.outputs.version-number }}" >> $GITHUB_ENV
+          echo "VERSION=${{ steps.pubspec.outputs.version-number }}" >> "$GITHUB_ENV"
 
       # リリースブランチ名を環境変数に設定する。
       - name: Set branch name to GITHUB_OUTPUT
         run: |
           branch_name="release/${{ env.VERSION }}"
-          echo "BRANCH_NAME=${branch_name}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${branch_name}" >> "$GITHUB_ENV"
 
       # リリースバージョン・インクリメントしたビルド番号・リリースブランチ名を出力変数に設定する。
       - name: Set version and branch name to GITHUB_OUTPUT
         id: set-output
         run: |
-          echo "version=${{ env.VERSION }}" >> "$GITHUB_OUTPUT"
-          echo "build-number=$((${{ steps.pubspec.outputs.build-number }} + 1))" >> "$GITHUB_OUTPUT"
-          echo "branch_name=${{ env.BRANCH_NAME }}" >> "$GITHUB_OUTPUT"
+          {
+            echo "version=${{ env.VERSION }}"
+            echo "build-number=$((${{ steps.pubspec.outputs.build-number }} + 1))"
+            echo "branch_name=${{ env.BRANCH_NAME }}"
+          } >> "$GITHUB_OUTPUT"
 
   # リリースブランチを作成する。
   create-branch:
@@ -80,7 +82,7 @@ jobs:
       # ブランチ名を環境変数に設定する。
       - name: Set branch name to GITHUB_ENV
         run: |
-          echo "BRANCH_NAME=${{ needs.set-version-and-branch-name.outputs.branch_name }}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${{ needs.set-version-and-branch-name.outputs.branch_name }}" >> "$GITHUB_ENV"
 
       # リリースブランチがすでに存在するかどうかを判定し、結果を環境変数に設定する。
       - name: Set whether the branch is already existing to GITHUB_ENV
@@ -90,7 +92,7 @@ jobs:
             echo true ||
             echo false
           )
-          echo "BRANCH_IS_EXISTING=${branch_is_existing}" >> $GITHUB_ENV
+          echo "BRANCH_IS_EXISTING=${branch_is_existing}" >> "$GITHUB_ENV"
 
       # リリースブランチが存在しない場合は作成する。
       - name: Create release branch
@@ -127,7 +129,7 @@ jobs:
       - name: Check diff
         run: |
           diff_count=$(git diff | wc -l)
-          echo "DIFF_COUNT=${diff_count}" >> $GITHUB_ENV
+          echo "DIFF_COUNT=${diff_count}" >> "$GITHUB_ENV"
 
       # 変更差分がある場合はコミットするためのGitの設定を行う。
       - name: Git config
@@ -167,9 +169,9 @@ jobs:
           APP_TOKEN: ${{ secrets.app-token }}
         run: |
           if [ -n "$APP_TOKEN" ]; then
-            echo "HAS_TOKEN=true" >> $GITHUB_ENV;
+            echo "HAS_TOKEN=true" >> "$GITHUB_ENV";
           else
-            echo "HAS_TOKEN=false" >> $GITHUB_ENV;
+            echo "HAS_TOKEN=false" >> "$GITHUB_ENV";
           fi
 
       # app-tokenの提供がなければ、GitHub Appのトークンを生成する。
