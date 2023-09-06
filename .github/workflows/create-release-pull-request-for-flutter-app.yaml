@@ -159,12 +159,12 @@ jobs:
 
       - name: Create release PR
         env:
-          GITHUB_TOKEN: steps.generate_token.outputs.token
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
           title: "build: bump app to ${{ env.version }}+${{ env.build-number }}"
         run: gh pr create -B "$GITHUB_REF" -H "${{ env.branch }}" -t "${{ env.title }}" -b "" -a "$GITHUB_ACTOR"
 
       - name: Revoke GitHub Apps token
-        if: steps.generate_token.conclusion == 'success'
+        if: success() || (failure() && steps.generate_token.conclusion == 'success')
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
