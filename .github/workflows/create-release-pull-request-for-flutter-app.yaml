@@ -161,7 +161,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
           title: "build: bump app to ${{ env.version }}+${{ env.build-number }}"
-        run: gh pr create -B "$GITHUB_REF" -H "${{ env.branch }}" -t "${{ env.title }}" -b "" -a "$GITHUB_ACTOR"
+          body: "This pull request was generated automatically by GitHub Actions."
+        run: gh pr create -B "$GITHUB_REF" -H "${{ env.branch }}" -t "${{ env.title }}" -b "${{ env.body }}" -a "$GITHUB_ACTOR"
 
       - name: Revoke GitHub Apps token
         if: success() || (failure() && steps.generate_token.conclusion == 'success')
