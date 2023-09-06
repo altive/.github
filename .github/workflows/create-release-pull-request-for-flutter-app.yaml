@@ -10,189 +10,161 @@ on:
         required: false
         type: string
       working-directory:
-        description: "モノレポの場合はをディレクトリを指定する"
+        description: "For mono-repo, specify the directory."
         default: "./"
         type: string
     secrets:
       app-id:
-        description: "GitHub App ID"
+        description: | 
+          "GitHub App ID."
+          "Required because Actions will not run on the pull request you create if you do not use the GitHub App."
         required: true
       private-key:
-        description: "GitHub App private key"
+        description: |
+          "GitHub App private key."
+          "Required because Actions will not run on the pull request you create if you do not use the GitHub App."
         required: true
-      app-token:
-        description: "GitHub App token"
-        required: false
 
 jobs:
-  # リリースバージョンとブランチ名を設定する。
-  set-version-and-branch-name:
+  set-version-and-branch:
     name: Set version and branch name
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set-output.outputs.version }}
       build-number: ${{ steps.set-output.outputs.build-number }}
-      branch_name: ${{ steps.set-output.outputs.branch_name }}
+      branch: ${{ steps.set-output.outputs.branch }}
     steps:
       - uses: actions/checkout@v3
 
-      # 現在のバージョンとビルド番号を取得する。
       - name: Retrieve pubspec metadata
         id: pubspec
         uses: altive/pubspec-metadata@v1
         with:
           pubspec-file: "${{ inputs.working-directory }}/pubspec.yaml"
 
-      # リリースバージョンが入力されている場合は入力されたバージョンを環境変数に設定する。
       - name: Set input version to GITHUB_ENV
         if: ${{ inputs.version }}
         run: |
-          echo "VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
+          echo "version=${{ inputs.version }}" >> "$GITHUB_ENV"
 
-      # リリースバージョンが入力されていない場合は現在のバージョンを環境変数に設定する。
       - name: Set current version to GITHUB_ENV
         if: ${{ !inputs.version }}
         run: |
-          echo "VERSION=${{ steps.pubspec.outputs.version-number }}" >> "$GITHUB_ENV"
+          echo "version=${{ steps.pubspec.outputs.version-number }}" >> "$GITHUB_ENV"
 
-      # リリースブランチ名を環境変数に設定する。
       - name: Set branch name to GITHUB_OUTPUT
         run: |
-          branch_name="release/${{ env.VERSION }}"
-          echo "BRANCH_NAME=${branch_name}" >> "$GITHUB_ENV"
+          b="release/${{ env.version }}"
+          echo "branch=${b}" >> "$GITHUB_ENV"
 
-      # リリースバージョン・インクリメントしたビルド番号・リリースブランチ名を出力変数に設定する。
-      - name: Set version and branch name to GITHUB_OUTPUT
+      - name: Set version and branch to GITHUB_OUTPUT
         id: set-output
         run: |
           {
-            echo "version=${{ env.VERSION }}"
+            echo "version=${{ env.version }}"
             echo "build-number=$((${{ steps.pubspec.outputs.build-number }} + 1))"
-            echo "branch_name=${{ env.BRANCH_NAME }}"
+            echo "branch=${{ env.branch }}"
           } >> "$GITHUB_OUTPUT"
 
-  # リリースブランチを作成する。
   create-branch:
     name: Create release branch
     runs-on: ubuntu-latest
-    needs: [set-version-and-branch-name]
+    needs: [set-version-and-branch]
     steps:
       - uses: actions/checkout@v3
 
-      # ブランチ名を環境変数に設定する。
       - name: Set branch name to GITHUB_ENV
         run: |
-          echo "BRANCH_NAME=${{ needs.set-version-and-branch-name.outputs.branch_name }}" >> "$GITHUB_ENV"
+          echo "branch=${{ needs.set-version-and-branch.outputs.branch }}" >> "$GITHUB_ENV"
 
-      # リリースブランチがすでに存在するかどうかを判定し、結果を環境変数に設定する。
       - name: Set whether the branch is already existing to GITHUB_ENV
         run: |
-          branch_is_existing=$(
-            git fetch origin ${{ env.BRANCH_NAME }} &&
+          exists=$(
+            git fetch origin ${{ env.branch }} &&
             echo true ||
             echo false
           )
-          echo "BRANCH_IS_EXISTING=${branch_is_existing}" >> "$GITHUB_ENV"
+          echo "branch_exists=${exists}" >> "$GITHUB_ENV"
 
-      # リリースブランチが存在しない場合は作成する。
       - name: Create release branch
-        if: env.BRANCH_IS_EXISTING == 'false'
+        if: env.branch_exists == 'false'
         run: |
-          git switch -c ${{ env.BRANCH_NAME }}
-          git push origin ${{ env.BRANCH_NAME }}
+          git switch -c ${{ env.branch }}
+          git push origin ${{ env.branch }}
 
-  # バージョン番号とビルド番号を上げる。
   bump-version:
     name: Bump version and build number
     runs-on: ubuntu-latest
-    needs: [set-version-and-branch-name, create-branch]
+    needs: [set-version-and-branch, create-branch]
     env:
-      VERSION: ${{ needs.set-version-and-branch-name.outputs.version }}
-      BUILD: ${{ needs.set-version-and-branch-name.outputs.build-number }}
-      BRANCH_NAME: ${{ needs.set-version-and-branch-name.outputs.branch_name }}
+      version: ${{ needs.set-version-and-branch.outputs.version }}
+      build-number: ${{ needs.set-version-and-branch.outputs.build-number }}
+      branch: ${{ needs.set-version-and-branch.outputs.branch }}
     steps:
       - uses: actions/checkout@v3
 
-      # 作成したリリースブランチに切り替える。
       - name: Switch branch
         run: |
-          git fetch origin ${{ env.BRANCH_NAME }}
-          git switch ${{ env.BRANCH_NAME }}
+          git fetch origin ${{ env.branch }}
+          git switch ${{ env.branch }}
 
-      # バージョン番号とビルド番号を上げる。
       - name: Bump version and build number
         run: |
-          sed -i "s/^version:.*$/version:\ ${{ env.VERSION }}\+${{ env.BUILD }}/" ./pubspec.yaml
+          sed -i "s/^version:.*$/version:\ ${{ env.version }}\+${{ env.build-number }}/" ./pubspec.yaml
         working-directory: ${{ inputs.working-directory }}
 
-      # 変更差分があるかどうかを判定し、結果を環境変数に設定する。
       - name: Check diff
         run: |
           diff_count=$(git diff | wc -l)
-          echo "DIFF_COUNT=${diff_count}" >> "$GITHUB_ENV"
+          if [ "$diff_count" -ne 0 ]; then
+              echo "has-diff=true" >> "$GITHUB_ENV"
+          else
+              echo "has-diff=false" >> "$GITHUB_ENV"
+          fi
 
-      # 変更差分がある場合はコミットするためのGitの設定を行う。
       - name: Git config
-        if: env.DIFF_COUNT != '0'
+        if: env.has-diff == 'true'
         run: |
           git remote set-url origin "https://github-actions:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}"
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-      # 変更差分がある場合はコミットする。
       - name: Commit & Push
-        if: env.DIFF_COUNT != '0'
+        if: env.has-diff == 'true'
         run: |
           git add .
-          git commit -m "build: bump app to ${{ env.VERSION }}+${{ env.BUILD }}"
-          git push origin ${{ env.BRANCH_NAME }}
+          git commit -m "build: bump app to ${{ env.version }}+${{ env.build-number }}"
+          git push origin ${{ env.branch }}
 
-  # Pull-Requestを作成する。
   create-pr:
     name: Create Pull-Request for release
     runs-on: ubuntu-latest
-    needs: [set-version-and-branch-name, bump-version]
+    needs: [set-version-and-branch, bump-version]
     permissions:
       contents: write
       pull-requests: write
     env: 
-      BRANCH_NAME: ${{ needs.set-version-and-branch-name.outputs.branch_name }}
+      branch: ${{ needs.set-version-and-branch.outputs.branch }}
+      version: ${{ needs.set-version-and-branch.outputs.version }}
+      build-number: ${{ needs.set-version-and-branch.outputs.build-number }}
     steps:
       - uses: actions/checkout@v3
 
-      # secrets: app-tokenの存在確認
-      - name: Check for Secret availability
-        id: secret-check
-        # perform secret check & put boolean result as an output
-        shell: bash
-        env: 
-          APP_TOKEN: ${{ secrets.app-token }}
-        run: |
-          if [ -n "$APP_TOKEN" ]; then
-            echo "HAS_TOKEN=true" >> "$GITHUB_ENV";
-          else
-            echo "HAS_TOKEN=false" >> "$GITHUB_ENV";
-          fi
-
-      # app-tokenの提供がなければ、GitHub Appのトークンを生成する。
       - name: Generate GiHub App token
-        if: ${{ env.HAS_TOKEN }} == 'false'
         id: generate_token
         uses: tibdex/github-app-token@v1
         with:
           app_id: ${{ secrets.app-id }}
           private_key: ${{ secrets.private-key }}
 
-      # mainブランチ向けにPull-Requestを作成する。
       - name: Create release PR
         env:
-          GITHUB_TOKEN: |-
-            ${{ env.HAS_TOKEN && secrets.app-token || steps.generate_token.outputs.token }}
-        run: gh pr create -B "$GITHUB_REF" -t ${{ env.BRANCH_NAME }} -b "" -a "$GITHUB_ACTOR" -H ${{ env.BRANCH_NAME }}
+          GITHUB_TOKEN: steps.generate_token.outputs.token
+          title: "build: bump app to ${{ env.version }}+${{ env.build-number }}"
+        run: gh pr create -B "$GITHUB_REF" -H "${{ env.branch }}" -t "${{ env.title }}" -b "" -a "$GITHUB_ACTOR"
 
-      # GitHub Appのトークンを失効させる。
       - name: Revoke GitHub Apps token
-        if: ${{ env.HAS_TOKEN }} == 'false'
+        if: steps.generate_token.conclusion == 'success'
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
