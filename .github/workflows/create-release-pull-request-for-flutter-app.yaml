@@ -152,7 +152,7 @@ jobs:
 
       - name: Generate GiHub App token
         id: generate_token
-        uses: tibdex/github-app-token@v1
+        uses: actions/create-github-app-token@v1
         with:
           app_id: ${{ secrets.app-id }}
           private_key: ${{ secrets.private-key }}
@@ -163,14 +163,3 @@ jobs:
           title: "build: bump app to ${{ env.version }}+${{ env.build-number }}"
           body: "This pull request was generated automatically by GitHub Actions."
         run: gh pr create -B "$GITHUB_REF" -H "${{ env.branch }}" -t "${{ env.title }}" -b "${{ env.body }}" -a "$GITHUB_ACTOR"
-
-      - name: Revoke GitHub Apps token
-        if: success() || (failure() && steps.generate_token.conclusion == 'success')
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: |
-          curl --location --silent --request DELETE \
-            --url "${GITHUB_API_URL}/installation/token" \
-            --header "Accept: application/vnd.github+json" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            --header "Authorization: Bearer ${GITHUB_TOKEN}"
