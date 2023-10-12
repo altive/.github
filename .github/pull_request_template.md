@@ -1,30 +1,19 @@
-## 🔗 Issue リンク
-
+🔗 Related Issues
+<!-- Please list any related Issues or Issues that will be resolved by this PR -->
 - closes #0
 
-## 🙌 やったこと
-
-<!-- このプルリクで何をしたのか？ -->
-
+🙌 What's Done
+<!-- What has been done in this Pull Request? -->
 - 
 
-## ✍️ やらないこと
-
-<!-- このプルリクでやらないことは何か？（あれば。無いなら「無し」でOK） -->
-
+✍️ What's Not Done
+<!-- What is not done in this Pull Request? If none, write "None". -->
 - 
 
-## ✅ 動作確認
+Image Differences
+<!-- Attach Before and After capture images or videos if there are UI changes. -->
 
-<!-- ビルド・起動確認＋必要な動作確認があれば追記 -->
 
-- [ ] iOS
-- [ ] Android
+Additional Notes
+<!-- Additional information for reviewers, such as concerns or notes for the implementation. -->
 
-## スクリーンショット
-
-<!-- UIに変更箇所がある場合はBefore, Afterのキャプチャ画像、もしくは動画を添付する -->
-
-## その他
-
-<!-- レビュワーへの参考情報（実装上の懸念点や注意点などあれば記載） -->
