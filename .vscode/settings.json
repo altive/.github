@@ -1,7 +1,8 @@
 {
     "cSpell.words": [
         "dgst",
-        "noreply"
+        "noreply",
+        "riscait"
     ],
     "yaml.schemas": {
         "https://json.schemastore.org/yamllint.json": ".github/ISSUE_TEMPLATE/config.yml"
