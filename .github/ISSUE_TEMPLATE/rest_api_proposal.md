@@ -33,7 +33,8 @@ assignees: ''
 #### Example JSON
 ```json
 {
-    "key": "value"
+    "key1": "value1",
+    "key2": "value2"
 }
 ```
 
@@ -41,5 +42,13 @@ assignees: ''
 | Error code| message | reason |
 |---|---|---|
 |  |  |  |
+
+#### Example JSON
+```json
+{
+    "error_code": "ERROR_CODE",
+    "message": "error message"
+}
+```
 
 ## Additional information
