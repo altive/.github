@@ -8,29 +8,49 @@ assignees: ''
 ## Overview
 
 
-## HTTP method / Endpoint
+### Basic Information
 <!-- example: `GET v2/posts` -->
+
+| HTTP Method | Version | Endpoint |
+|:---:|:---:|:---:|
+|  |  |  |
 
 ## Request
 
+### Header Parameters
+
+| Key | Value |
+|:---:|---|
+| **Authorization** |  |
+
 ### Path parameters
+
 | Name | Type | Description | Example |
 |---|---|---|---|
 |  |  |  |  |
 
 ### Query parameters
+
+| Name | Type | Description | Example |
+|---|---|---|---|
+|  |  |  |  |
+
+### Body parameters
+
 | Name | Type | Description | Example |
 |---|---|---|---|
 |  |  |  |  |
 
 ## Response
 
-### Response body
+### body
+
 | Name | Type | Description | Example |
 |---|---|---|---|
 |  |  |  |  |
 
 #### Example JSON
+
 ```json
 {
     "key1": "value1",
@@ -38,15 +58,16 @@ assignees: ''
 }
 ```
 
-### Response errors
-| Error code| message | reason |
+### Errors
+
+| Code| Message | Reason |
 |---|---|---|
 |  |  |  |
 
 #### Example JSON
 ```json
 {
-    "error_code": "ERROR_CODE",
+    "code": "ERROR_CODE",
     "message": "error message"
 }
 ```
