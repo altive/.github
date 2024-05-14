@@ -13,6 +13,9 @@
 ## 🖼️ Image Differences
 <!-- Attach Before and After capture images or videos if there are UI changes. -->
 
+| Before | After |
+|--------|--------|
+| __image__ | __image__ | 
 
 ## 📝 Additional Notes
 <!-- Additional information for reviewers, such as concerns or notes for the implementation. -->
