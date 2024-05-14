@@ -7,13 +7,6 @@
             "addWords": true,
             "scope": "workspace"
         },
-        "flutter-words": {
-            "name": "flutter-words",
-            "path": "${workspaceRoot}/.cspell/flutter-words.txt",
-            "description": "Flutter App Development Words",
-            "addWords": true,
-            "scope": "workspace"
-        },
         "organization-words": {
             "name": "organization-words",
             "path": "${workspaceRoot}/.cspell/organization-words.txt",
