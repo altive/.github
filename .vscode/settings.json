@@ -1,8 +1,35 @@
 {
-    "cSpell.words": [
-        "dgst",
-        "noreply",
-        "riscait"
+    "cSpell.customDictionaries": {
+        "project-words": {
+            "name": "project-words",
+            "path": "${workspaceRoot}/.cspell/project-words.txt",
+            "description": "Words specific to this project",
+            "addWords": true,
+            "scope": "workspace"
+        },
+        "organization-words": {
+            "name": "organization-words",
+            "path": "${workspaceRoot}/.cspell/organization-words.txt",
+            "description": "Organization Words",
+            "addWords": true,
+            "scope": "workspace"
+        }
+    },
+    "cSpell.ignorePaths": [
+        "dart_defines",
+        "firebase_options*.dart",
+        "google-services.json",
+        "node_modules",
+        "package-lock.json",
+        "vscode-extension",
+        "*.gen.dart",
+        "*.lock",
+        "*.xcconfig",
+        "**/fvm",
+        "**/.pub-cache",
+        ".git/objects",
+        ".vscode",
+        ".vscode-insiders"
     ],
     "yaml.schemas": {
         "https://json.schemastore.org/yamllint.json": ".github/ISSUE_TEMPLATE/config.yml"
