@@ -2,8 +2,6 @@ name: 不具合の報告 (Bug Report for Japanese)
 description: 不具合を報告します。
 title: "[Bug]: "
 labels: ["bug", "triage"]
-assignees:
-  - riscait
 body:
   - type: markdown
     attributes:
