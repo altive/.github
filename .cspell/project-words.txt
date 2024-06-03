@@ -32,5 +32,6 @@ prefs
 recase
 remoteconfig
 subloc
+tasklist
 todos
 wholename
