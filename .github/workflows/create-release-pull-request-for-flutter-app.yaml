@@ -34,7 +34,7 @@ jobs:
       build-number: ${{ steps.set-output.outputs.build-number }}
       branch: ${{ steps.set-output.outputs.branch }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Retrieve pubspec metadata
         id: pubspec
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [set-version-and-branch]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set branch name to GITHUB_ENV
         run: |
@@ -101,7 +101,7 @@ jobs:
       build-number: ${{ needs.set-version-and-branch.outputs.build-number }}
       branch: ${{ needs.set-version-and-branch.outputs.branch }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Switch branch
         run: |
@@ -148,14 +148,14 @@ jobs:
       version: ${{ needs.set-version-and-branch.outputs.version }}
       build-number: ${{ needs.set-version-and-branch.outputs.build-number }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Generate GiHub App token
+      - name: Generate GitHub App token
         id: generate_token
         uses: actions/create-github-app-token@v1
         with:
-          app_id: ${{ secrets.app-id }}
-          private_key: ${{ secrets.private-key }}
+          app-id: ${{ secrets.app-id }}
+          private-key: ${{ secrets.private-key }}
 
       - name: Create release PR
         env:
