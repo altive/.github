@@ -9,6 +9,14 @@ on:
           If not specified, only the build number is incremented.
         required: false
         type: string
+      branch-path-segment:
+        description: |
+          Additional path segment for release branch name (e.g., client, admin)
+          If specified, the branch name will be: release/{branch-path-segment}/{version}
+          If not specified, the branch name will be: release/{version}
+          This is useful when managing multiple apps in a mono-repo to avoid branch name conflicts.
+        required: false
+        type: string
       working-directory:
         description: "For mono-repo, specify the directory."
         default: "./"
@@ -54,7 +62,11 @@ jobs:
 
       - name: Set branch name to GITHUB_OUTPUT
         run: |
-          b="release/${{ env.version }}"
+          if [ -n "${{ inputs.branch-path-segment }}" ]; then
+            b="release/${{ inputs.branch-path-segment }}/${{ env.version }}"
+          else
+            b="release/${{ env.version }}"
+          fi
           echo "branch=${b}" >> "$GITHUB_ENV"
 
       - name: Set version and branch to GITHUB_OUTPUT
